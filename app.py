@@ -25,7 +25,7 @@ def load_lottieurl(url):
     if r.status_code != 200:
         return None
     return r.json()
-
+#Function that is marking attendance in Attendance.csv file
 def attendance(name):
     with open('Attendance.csv', 'r+') as f:
         myDataList = f.readlines()
@@ -51,7 +51,7 @@ with st.container():
     st.write("[Learn More >](https://www.linkedin.com/in/digvijay-singh-thakur-27a7b1219/)")
 
 
-
+#This the first part of the web page that majorly tells us about the creater of the page
 with st.container():
     st.write("---")
     left_column, right_column = st.columns(2)
@@ -61,13 +61,13 @@ with st.container():
         st.write(
             """
             This is a web Based applcation which primarily works on making attendence using facal recognition for a given dataset.
-            The python libraries which Ihave used while making this project are OpenC, face_recognition,dlib and som other small libraries
+            The python libraries which Ihave used while making this project are OpenCV, face_recognition,dlib and some other small libraries
             """
         )
      
     with right_column:
         st_lottie(lottie_coding, height=300, key="coding")
-
+#Face Recognition is handeled here 
 with st.container():
 
     st.title("Face Recognition System")
@@ -84,7 +84,7 @@ with st.container():
         images.append(current_img)
         personName.append(os.path.splitext(cu_img)[0])
     # print(personName)
-
+    #Part of the code that deals with encodings
     def faceEncodings(images):
         encodeList = []
         for img in images:
@@ -94,16 +94,18 @@ with st.container():
         return encodeList
 
     encodeListKnown = faceEncodings(images)
+    #Print when encoding is completed
     print("All Encodings Completed!!!")
- 
+    #Taking input from the camera
     camera = cv2.VideoCapture(0)
 
     while run:
+        #Creating frames
         ret, frame = camera.read()
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         faces = cv2.resize(frame, (0,0), None, 0.25, 0.25)
         faces = cv2.cvtColor(faces, cv2.COLOR_BGR2RGB)
-
+        #face recognition is done using face recognition library
         facesCurrentFrame = face_recognition.face_locations(faces)
         encodeCurrentFrame = face_recognition.face_encodings(faces, facesCurrentFrame)
 
@@ -112,9 +114,10 @@ with st.container():
             faceDis = face_recognition.face_distance(encodeListKnown, encodeFace)
 
             matchIndex = np.argmin(faceDis)
-
+            #Once we have the camera input and the database image the below code perform the matching
             if matches[matchIndex]:
                 name = personName[matchIndex].upper()
+                #Forming of rectangle once the detection is done
                 y1, x2, y2, x1 = faceLoc
                 y1, x2, y2, x1 = y1*4, x2*4, y2*4, x1*4
                 cv2.rectangle(frame, (x1,y1),(x2,y2),(0,255,0), 2)
@@ -122,10 +125,10 @@ with st.container():
                 cv2.putText(frame, name, (x1 + 6, y2 - 6), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0,255), 2)
                 attendance(name)
         FRAME_WINDOW.image(frame)
-
+    #If the run button is not pressed then simply print Stopped
     else:
         st.write('Stopped')
-
+#Login and SignUp Container
 with st.container():
     firebase = pyrebase.initialize_app(firebaseConfig)
     auth = firebase.auth()
@@ -224,7 +227,7 @@ with st.container():
                     results = db.child(user['localId']).child("Posts").push(post)
                     st.balloons()
 
-                # This coloumn for the post Display
+                # This column for the post Display
                 with col2:
                     
                     all_posts = db.child(user['localId']).child("Posts").get()
@@ -273,3 +276,4 @@ with st.container():
                             if all_posts.val() is not None:    
                                 for Posts in reversed(all_posts.each()):
                                     st.code(Posts.val(),language = '')
+
